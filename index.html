@@ -4,676 +4,672 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Hikari — Anime Wife Companion</title>
+  <title>HIKARI CORE — Neural Voice AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   
   <style>
+    :root {
+      --neon-cyan: #00f2fe;
+      --neon-blue: #4facfe;
+      --neon-pink: #ff2a85;
+      --neon-purple: #9d4edd;
+    }
+
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background: radial-gradient(circle at 50% 15%, #251638 0%, #120c1f 50%, #07050a 100%);
-      color: #fff;
+      background: #030611;
+      color: #e2e8f0;
       overflow-x: hidden;
       touch-action: manipulation;
     }
 
-    /* Idle subtle breathing animation */
-    @keyframes gentleBreathing {
-      0%, 100% {
-        transform: translateY(0px) scale(1);
-      }
-      50% {
-        transform: translateY(-5px) scale(1.008);
-      }
+    .font-hud {
+      font-family: 'Share Tech Mono', monospace;
     }
 
-    .character-idle {
-      animation: gentleBreathing 4.6s ease-in-out infinite;
+    .font-orbitron {
+      font-family: 'Orbitron', sans-serif;
     }
 
-    /* Pulse for recording */
-    @keyframes pulseGlow {
-      0% {
-        box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7);
-      }
-      70% {
-        box-shadow: 0 0 0 16px rgba(244, 63, 94, 0);
-      }
-      100% {
-        box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
-      }
+    /* Cyber grid overlay */
+    .bg-grid {
+      background-image: 
+        linear-gradient(to right, rgba(0, 242, 254, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 242, 254, 0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
     }
 
-    .mic-recording {
-      animation: pulseGlow 1.4s infinite;
-      background: linear-gradient(135deg, #e11d48, #be123c) !important;
+    /* Rotating HUD Outer Rings */
+    @keyframes spinClockwise {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes spinCounterClockwise {
+      0% { transform: rotate(360deg); }
+      100% { transform: rotate(0deg); }
+    }
+    @keyframes pulseRing {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.04); }
     }
 
-    /* Custom scrollbars */
-    ::-webkit-scrollbar {
-      width: 4px;
+    .hud-ring-outer {
+      animation: spinClockwise 28s linear infinite;
     }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 182, 193, 0.25);
-      border-radius: 4px;
+    .hud-ring-inner {
+      animation: spinCounterClockwise 18s linear infinite;
+    }
+    .hud-pulse {
+      animation: pulseRing 3.5s ease-in-out infinite;
+    }
+
+    /* Holographic Glows */
+    .glow-cyan {
+      box-shadow: 0 0 35px rgba(0, 242, 254, 0.35), inset 0 0 25px rgba(0, 242, 254, 0.2);
+    }
+    .glow-speaking {
+      box-shadow: 0 0 50px rgba(255, 42, 133, 0.6), inset 0 0 30px rgba(255, 42, 133, 0.3);
+      filter: drop-shadow(0 0 20px #ff2a85);
+    }
+    .glow-listening {
+      box-shadow: 0 0 55px rgba(0, 242, 254, 0.7), inset 0 0 30px rgba(0, 242, 254, 0.4);
+      filter: drop-shadow(0 0 25px #00f2fe);
+    }
+
+    /* Audio visualizer bar animations */
+    .wave-bar {
+      transition: height 0.08s ease;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between select-none">
+<body class="min-h-screen bg-grid flex flex-col justify-between relative select-none">
 
-  <!-- TOP APP BAR -->
-  <header class="w-full px-5 pt-4 pb-2 flex justify-between items-center z-20">
-    <div class="flex items-center space-x-2">
-      <span class="text-rose-300 font-bold tracking-wider text-sm flex items-center gap-1.5">
-        HIKARI <span class="text-xs text-rose-400">♥</span> WIFE
-      </span>
-      <span id="modelBadge" class="text-[10px] bg-purple-950/70 border border-purple-500/40 text-purple-300 px-2 py-0.5 rounded-full">
-        Ready
-      </span>
-    </div>
-    
+  <!-- TOP HUD SYSTEM TELEMETRY -->
+  <header class="w-full px-5 pt-4 pb-2 flex justify-between items-center z-30 font-hud text-xs border-b border-cyan-500/20 bg-black/40 backdrop-blur-md">
     <div class="flex items-center space-x-3">
-      <button onclick="openModal('characterModal')" title="Change Portrait" class="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition active:scale-95 text-xs text-rose-200">
-        🖼️
-      </button>
-      <button onclick="openModal('voiceModal')" title="Voice Settings" class="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition active:scale-95 text-xs text-rose-200">
-        🔊
-      </button>
-      <button onclick="openModal('keyModal')" title="API Settings" class="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition active:scale-95 text-xs text-rose-200">
+      <div class="flex items-center space-x-1.5">
+        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+      </div>
+      <div>
+        <span class="text-cyan-400 font-bold tracking-widest font-orbitron">HIKARI // CORE</span>
+        <span class="text-[10px] text-cyan-200/50 ml-1.5 hidden sm:inline">V3.4-NEURAL</span>
+      </div>
+    </div>
+
+    <!-- Status readout -->
+    <div class="flex items-center space-x-4">
+      <div class="text-right">
+        <span id="sysStatus" class="text-cyan-300 font-bold tracking-wider text-[11px] block">SYS: READY</span>
+        <span id="brainStatus" class="text-[9px] text-rose-300/80 block">OFFLINE MODE</span>
+      </div>
+      <button onclick="toggleSettingsModal(true)" title="Configure System" class="p-2 rounded-lg bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-900/50 active:scale-95 transition">
         ⚙️
       </button>
-      <div id="liveDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></div>
     </div>
   </header>
 
-  <!-- MAIN CHARACTER VIEWPORT -->
-  <main class="flex-1 flex flex-col items-center justify-center px-4 relative my-auto">
-    
-    <!-- Character Frame Container -->
-    <div class="relative w-[300px] sm:w-[340px] h-[390px] sm:h-[430px] rounded-3xl overflow-hidden shadow-[0_15px_45px_rgba(0,0,0,0.85)] border border-rose-500/20 bg-gradient-to-b from-[#1c1328] to-[#0c0814] flex items-center justify-center">
-      
-      <!-- Ambient Glow Behind Character -->
-      <div class="absolute inset-0 bg-gradient-to-t from-rose-950/40 via-transparent to-transparent pointer-events-none z-10"></div>
-      
-      <!-- Character Wrapper with Breathing Animation -->
-      <div id="characterRig" class="relative w-full h-full character-idle flex items-center justify-center">
-        <!-- Main Anime Portrait Image -->
-        <img 
-          id="characterImg" 
-          src="https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=700&q=80" 
-          alt="Hikari Anime Wife" 
-          class="w-full h-full object-cover object-top select-none transition-all duration-300 pointer-events-none"
-          onerror="this.src='https://placehold.co/400x600/1e122b/ffb2c9?text=Hikari+Wife'"
-        />
+  <!-- CENTRAL HOLOGRAM VIEWPORT (JARVIS ARC REACTOR ORB) -->
+  <main class="flex-1 flex flex-col items-center justify-center px-4 relative my-auto w-full">
 
-        <!-- Dynamic Responsive Blush Glow Layer -->
-        <div id="blushOverlay" class="absolute w-[80%] h-[30%] top-[40%] bg-rose-500/25 rounded-full blur-xl opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+    <!-- HUD Background Target Decals -->
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+      <div class="w-[360px] h-[360px] border border-cyan-400/30 rounded-full"></div>
+      <div class="w-[480px] h-[480px] border border-dashed border-cyan-400/20 rounded-full"></div>
+    </div>
 
-        <!-- Blinking Eyelid Simulation Overlay -->
-        <div id="blinkOverlay" class="absolute top-[34%] left-[28%] w-[44%] h-[14%] bg-stone-900/90 rounded-full blur-[1px] opacity-0 transition-opacity duration-75 pointer-events-none"></div>
+    <!-- Central Interactive Holographic Reactor Unit -->
+    <div class="relative w-[280px] h-[280px] sm:w-[330px] sm:h-[330px] flex items-center justify-center">
 
-        <!-- Synchronized Animated Lip-Sync Mouth Overlay -->
-        <!-- Placed dynamically near average anime mouth position; adjustable via settings -->
-        <div id="mouthContainer" class="absolute top-[52%] left-[47%] transform -translate-x-1/2 flex items-center justify-center pointer-events-none z-20">
-          <div id="mouthLip" class="w-4 h-1.5 bg-[#b8384f] border border-[#831e32] rounded-full transition-all duration-75 shadow-sm"></div>
-        </div>
-      </div>
+      <!-- Outer HUD Reticle 1 (Clockwise Rotation) -->
+      <svg class="absolute inset-0 w-full h-full hud-ring-outer pointer-events-none" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="95" fill="none" stroke="rgba(0, 242, 254, 0.25)" stroke-width="1.5" stroke-dasharray="14 18 35 12" />
+        <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(255, 42, 133, 0.2)" stroke-width="1" stroke-dasharray="6 24" />
+      </svg>
 
-      <!-- Quick Mood Heart Reaction Overlay -->
-      <div id="reactionHeart" class="absolute top-4 right-4 text-2xl opacity-0 transition-all duration-500 pointer-events-none z-30">
-        💖
+      <!-- Inner HUD Reticle 2 (Counter-Clockwise Rotation) -->
+      <svg class="absolute inset-0 w-full h-full hud-ring-inner pointer-events-none" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="76" fill="none" stroke="rgba(0, 242, 254, 0.4)" stroke-width="2" stroke-dasharray="28 35 10 30" />
+        <circle cx="100" cy="100" r="68" fill="none" stroke="rgba(79, 172, 254, 0.25)" stroke-width="1" stroke-dasharray="4 8" />
+      </svg>
+
+      <!-- Pulsing Ambient Energy Aura -->
+      <div id="orbAura" class="absolute w-[180px] h-[180px] sm:w-[210px] sm:h-[210px] rounded-full bg-gradient-to-tr from-cyan-600/30 via-rose-500/20 to-blue-500/40 blur-2xl hud-pulse pointer-events-none transition-all duration-300"></div>
+
+      <!-- Core Glowing Reactor Orb -->
+      <div id="coreReactor" onclick="handleOrbClick()" class="relative w-[150px] h-[150px] sm:w-[170px] sm:h-[170px] rounded-full bg-gradient-to-b from-[#09152b] via-[#050b18] to-[#02050d] border-2 border-cyan-400/60 glow-cyan flex items-center justify-center cursor-pointer active:scale-95 transition-all duration-300 z-10">
+        
+        <!-- Canvas for Live Audio Waveforms & Sine Visualizer -->
+        <canvas id="orbCanvas" width="160" height="160" class="w-full h-full rounded-full"></canvas>
+
+        <!-- Center AI Core Indicator -->
+        <div id="coreCenterLight" class="absolute w-8 h-8 rounded-full bg-gradient-to-br from-cyan-300 to-cyan-500 shadow-[0_0_20px_#00f2fe] pointer-events-none transition-all duration-300"></div>
       </div>
 
     </div>
 
-    <!-- DIALOGUE SPEECH CARD -->
-    <div class="w-full max-w-sm mt-3 px-2 z-20">
-      <div class="bg-white/10 backdrop-blur-xl border border-rose-300/20 rounded-2xl p-4 shadow-xl text-center relative overflow-hidden min-h-[90px] flex flex-col justify-center">
-        <p id="dialogueText" class="text-sm sm:text-base leading-relaxed text-rose-50 font-normal">
-          "Uth gaye jaan? I was waiting for you... suno na, subah thoda paani piya tumne? 🌸"
+    <!-- AUDIO EQUALIZER FREQUENCY BARS -->
+    <div class="flex items-center justify-center space-x-1.5 h-8 mt-2 mb-3">
+      <div class="w-1 bg-cyan-400/60 rounded-full wave-bar h-2" id="bar1"></div>
+      <div class="w-1 bg-cyan-400/80 rounded-full wave-bar h-4" id="bar2"></div>
+      <div class="w-1 bg-rose-400 rounded-full wave-bar h-6" id="bar3"></div>
+      <div class="w-1 bg-cyan-300 rounded-full wave-bar h-3" id="bar4"></div>
+      <div class="w-1 bg-rose-400 rounded-full wave-bar h-5" id="bar5"></div>
+      <div class="w-1 bg-cyan-400/80 rounded-full wave-bar h-4" id="bar6"></div>
+      <div class="w-1 bg-cyan-400/60 rounded-full wave-bar h-2" id="bar7"></div>
+    </div>
+
+    <!-- HOLOGRAPHIC TRANSCRIPTION HUD READOUT -->
+    <div class="w-full max-w-md px-3 z-20">
+      <div class="bg-black/60 border border-cyan-500/30 rounded-2xl p-4 shadow-[0_10px_35px_rgba(0,0,0,0.8)] backdrop-blur-xl relative overflow-hidden">
+        
+        <!-- Top scanline accent -->
+        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
+
+        <div class="flex justify-between items-center mb-1.5 font-hud text-[11px] text-cyan-300/80">
+          <span id="hudSpeakerTag">AI // HIKARI VOICE CORE</span>
+          <span id="hudLatencyTag">LATENCY: 0.2s</span>
+        </div>
+
+        <p id="hudDialogue" class="text-sm sm:text-base leading-relaxed text-cyan-50 font-medium min-h-[50px] flex items-center justify-center text-center">
+          "Main live hu jaan! System operational... bolo, aaj kya plan hai tumhara? 💫"
         </p>
-        <span id="emotionBadge" class="text-[10px] text-rose-300/70 font-semibold tracking-wider uppercase mt-1">
-          Caring • Sweet
-        </span>
+
+        <!-- Dynamic Mood Telemetry -->
+        <div class="flex justify-between items-center mt-3 pt-2 border-t border-cyan-500/20 font-hud text-[10px] text-cyan-400/60">
+          <span id="personaTelemetry">MODE: WIFE (HINGLISH)</span>
+          <span id="audioTelemetry">AUDIO: NEURAL SYNTH</span>
+        </div>
       </div>
     </div>
 
   </main>
 
-  <!-- QUICK ACTION BUTTONS -->
-  <div class="w-full max-w-sm mx-auto px-4 z-20 mb-2">
-    <div class="flex items-center justify-center gap-2 overflow-x-auto py-1 text-xs">
-      <button onclick="triggerQuickPrompt('Chai time!')" class="bg-white/5 border border-white/10 text-rose-200 px-3 py-1.5 rounded-full whitespace-nowrap active:scale-95 transition hover:bg-white/10">
+  <!-- QUICK VOICE ACTION CHIPS -->
+  <div class="w-full max-w-md mx-auto px-4 z-20 mb-2">
+    <div class="flex items-center justify-center gap-2 overflow-x-auto py-1 font-hud text-xs">
+      <button onclick="sendQuickPrompt('Hey jaan, kaisa chal raha hai sab?')" class="bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 px-3 py-1.5 rounded-lg whitespace-nowrap active:scale-95 transition hover:bg-cyan-900/40">
+        💬 Hey jaan
+      </button>
+      <button onclick="sendQuickPrompt('Chai banayi tumne?')" class="bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 px-3 py-1.5 rounded-lg whitespace-nowrap active:scale-95 transition hover:bg-cyan-900/40">
         ☕ Chai time
       </button>
-      <button onclick="triggerQuickPrompt('I missed you so much today.')" class="bg-white/5 border border-white/10 text-rose-200 px-3 py-1.5 rounded-full whitespace-nowrap active:scale-95 transition hover:bg-white/10">
-        🫂 Miss you
+      <button onclick="sendQuickPrompt('Aaj bohot headache aur stress ho raha hai.')" class="bg-cyan-950/40 border border-cyan-500/30 text-rose-300 px-3 py-1.5 rounded-lg whitespace-nowrap active:scale-95 transition hover:bg-rose-900/30">
+        💆 Stress/Tired
       </button>
-      <button onclick="triggerQuickPrompt('Aaj bohot headache aur stress hai.')" class="bg-white/5 border border-white/10 text-rose-200 px-3 py-1.5 rounded-full whitespace-nowrap active:scale-95 transition hover:bg-white/10">
-        💆 Headache
-      </button>
-      <button onclick="triggerQuickPrompt('Aaj tum bohot sundar lag rahi ho.')" class="bg-white/5 border border-white/10 text-rose-200 px-3 py-1.5 rounded-full whitespace-nowrap active:scale-95 transition hover:bg-white/10">
-        ✨ Tease
+      <button onclick="sendQuickPrompt('Jarvis, give me an analytical daily briefing.')" class="bg-cyan-950/40 border border-cyan-500/30 text-cyan-200 px-3 py-1.5 rounded-lg whitespace-nowrap active:scale-95 transition hover:bg-cyan-900/40">
+        🛡️ Tactical Brief
       </button>
     </div>
   </div>
 
-  <!-- BOTTOM CONTROL BAR -->
-  <footer class="w-full max-w-sm mx-auto px-5 pb-6 flex flex-col items-center gap-3 z-20">
+  <!-- BOTTOM VOICE COMMAND CONTROL -->
+  <footer class="w-full max-w-md mx-auto px-5 pb-6 flex flex-col items-center gap-2 z-20">
     <button 
-      id="recordBtn" 
-      onclick="toggleSpeechRecognition()" 
-      class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 text-white font-semibold text-base shadow-[0_8px_25px_rgba(244,63,94,0.4)] flex items-center justify-center gap-2 active:scale-98 transition duration-200"
+      id="talkBtn" 
+      onclick="toggleListening()" 
+      class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white font-orbitron font-bold tracking-wider text-sm sm:text-base shadow-[0_0_25px_rgba(0,242,254,0.45)] border border-cyan-300/40 flex items-center justify-center gap-3 active:scale-98 transition duration-200"
     >
-      <span id="micIcon" class="text-lg">🎙️</span>
-      <span id="micText">Tap to Talk to Hikari</span>
+      <span id="btnIcon" class="text-xl">🎙️</span>
+      <span id="btnText">INITIALIZE VOICE COMMAND</span>
     </button>
-    <p class="text-[11px] text-rose-200/50">
-      Speaks genuine Hinglish with affectionate expressions
-    </p>
+    <div class="flex justify-between w-full font-hud text-[10px] text-cyan-400/50 px-2">
+      <span>TAP REACTOR OR BUTTON TO SPEAK</span>
+      <span>SECURE ENCRYPTED LOCAL LINK</span>
+    </div>
   </footer>
 
-  <!-- ==================== MODALS & CONFIGURATION ==================== -->
-
-  <!-- 1. API BRAIN MODAL -->
-  <div id="keyModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-    <div class="bg-[#181124] border border-rose-500/30 rounded-3xl p-6 w-full max-w-sm text-left shadow-2xl">
-      <h3 class="text-base font-bold text-rose-200 mb-1 flex items-center gap-2">
-        <span>⚙️</span> Lifetime AI Brain
-      </h3>
-      <p class="text-xs text-rose-100/60 mb-4 leading-relaxed">
-        Connect your free Gemini API Key for deep conversational memory and authentic Hinglish replies.
-      </p>
+  <!-- ==================== SYSTEM CONFIGURATION DRAWER / MODAL ==================== -->
+  <div id="settingsModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+    <div class="bg-[#080d1a] border border-cyan-500/40 rounded-3xl p-6 w-full max-w-md text-left shadow-[0_0_40px_rgba(0,242,254,0.2)] max-h-[92vh] overflow-y-auto font-sans">
       
-      <label class="block text-[11px] font-semibold text-rose-300 uppercase tracking-wider mb-1">
-        Google Gemini API Key
-      </label>
-      <input 
-        type="password" 
-        id="geminiKeyInput" 
-        placeholder="Paste AI Studio Key (AIzaSy...)" 
-        class="w-full bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-rose-400 mb-3"
-      >
-
-      <div class="text-[11px] text-rose-200/50 mb-5">
-        👉 Get free key from <a href="https://aistudio.google.com/" target="_blank" class="text-rose-300 underline">aistudio.google.com</a> (Free forever tier).
+      <div class="flex justify-between items-center mb-4 pb-2 border-b border-cyan-500/20">
+        <h3 class="font-orbitron text-sm font-bold text-cyan-300 flex items-center gap-2">
+          <span>⚙️</span> SYSTEM CONFIGURATION
+        </h3>
+        <button onclick="toggleSettingsModal(false)" class="text-cyan-400 font-hud text-lg px-2">✕</button>
       </div>
 
-      <div class="flex gap-2">
-        <button onclick="saveGeminiKey()" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-2.5 rounded-xl font-medium text-xs transition">
-          Save Key
-        </button>
-        <button onclick="closeModal('keyModal')" class="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs transition">
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2. VOICE STUDIO MODAL -->
-  <div id="voiceModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-    <div class="bg-[#181124] border border-rose-500/30 rounded-3xl p-6 w-full max-w-sm text-left shadow-2xl max-h-[90vh] overflow-y-auto">
-      <h3 class="text-base font-bold text-rose-200 mb-1 flex items-center gap-2">
-        <span>🔊</span> Voice Studio
-      </h3>
-      <p class="text-xs text-rose-100/60 mb-4">
-        Choose between local high-pitch warm voice or human-like ElevenLabs voice synthesis.
-      </p>
-
-      <!-- ElevenLabs Section -->
-      <div class="border-t border-white/10 pt-3 mb-4">
-        <label class="block text-[11px] font-semibold text-rose-300 uppercase tracking-wider mb-1">
-          ElevenLabs API Key (Ultra-Human Voice)
+      <!-- Brain Configuration -->
+      <div class="mb-5">
+        <label class="block font-hud text-xs text-cyan-300 mb-1">
+          GOOGLE GEMINI API KEY (FREE FOREVER BRAIN)
         </label>
         <input 
           type="password" 
-          id="elevenKeyInput" 
-          placeholder="Optional: xi-api-key..." 
-          class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-400 mb-2"
+          id="geminiKeyField" 
+          placeholder="Paste AI Studio Key (AIzaSy...)" 
+          class="w-full bg-black/60 border border-cyan-500/30 rounded-xl px-3.5 py-2.5 text-xs text-cyan-100 font-mono focus:outline-none focus:border-cyan-400 mb-2"
         >
+        <p class="text-[11px] text-cyan-200/50">
+          Get a free key without credit card from <a href="https://aistudio.google.com/" target="_blank" class="text-cyan-300 underline font-semibold">aistudio.google.com</a>.
+        </p>
+      </div>
 
-        <label class="block text-[11px] font-semibold text-rose-300 uppercase tracking-wider mb-1">
-          Voice ID
+      <!-- Personality Mode Selection -->
+      <div class="mb-5">
+        <label class="block font-hud text-xs text-cyan-300 mb-1.5">
+          CORE PERSONALITY MATRIX
         </label>
-        <input 
-          type="text" 
-          id="elevenVoiceInput" 
-          placeholder="Default: 21m00Tcm4TlvDq8ikWAM" 
-          class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-400 mb-1"
+        <select 
+          id="personaSelect" 
+          onchange="updatePersonaMode(this.value)" 
+          class="w-full bg-black/60 border border-cyan-500/30 rounded-xl px-3.5 py-2.5 text-xs text-cyan-100 focus:outline-none focus:border-cyan-400 font-hud"
         >
-        <span class="text-[10px] text-rose-200/50">Leave empty to use Android High-Quality Voice</span>
+          <option value="wife">1. Sweet Hinglish Wife (Affectionate, Teasing, Caring)</option>
+          <option value="companion">2. Loving Romantic Companion (Soft, Empathetic)</option>
+          <option value="jarvis">3. Tactical JARVIS AI (Precise, Sharp, Sophisticated)</option>
+        </select>
       </div>
 
-      <!-- Test Voice Button -->
-      <button onclick="testCurrentVoice()" class="w-full py-2 bg-purple-600/30 border border-purple-500/40 text-purple-200 rounded-xl text-xs font-semibold mb-4 hover:bg-purple-600/40 transition">
-        ▶ Test Voice Now
-      </button>
+      <!-- Voice Modulation Controls -->
+      <div class="mb-5 border-t border-cyan-500/20 pt-4">
+        <label class="block font-hud text-xs text-cyan-300 mb-2">
+          VOICE TUNING & CALIBRATION
+        </label>
+        
+        <div class="space-y-3 font-hud text-xs">
+          <div>
+            <div class="flex justify-between text-cyan-200/70 mb-1">
+              <span>VOICE PITCH (WARMTH)</span>
+              <span id="pitchVal">1.25x</span>
+            </div>
+            <input type="range" id="pitchSlider" min="0.8" max="1.6" step="0.05" value="1.25" oninput="updatePitchDisplay(this.value)" class="w-full accent-cyan-400">
+          </div>
 
+          <div>
+            <div class="flex justify-between text-cyan-200/70 mb-1">
+              <span>SPEAKING SPEED</span>
+              <span id="rateVal">1.0x</span>
+            </div>
+            <input type="range" id="rateSlider" min="0.8" max="1.3" step="0.05" value="1.0" oninput="updateRateDisplay(this.value)" class="w-full accent-cyan-400">
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
       <div class="flex gap-2">
-        <button onclick="saveVoiceSettings()" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-2.5 rounded-xl font-medium text-xs transition">
-          Apply Voice
+        <button onclick="saveSystemSettings()" class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-black font-orbitron font-bold py-2.5 rounded-xl text-xs transition active:scale-95 shadow-[0_0_15px_rgba(0,242,254,0.3)]">
+          APPLY CONFIGURATION
         </button>
-        <button onclick="closeModal('voiceModal')" class="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs transition">
-          Close
+        <button onclick="testSpeechVoice()" class="px-4 py-2.5 bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 font-hud rounded-xl text-xs hover:bg-cyan-900/50 transition">
+          TEST AUDIO
         </button>
       </div>
+
     </div>
   </div>
 
-  <!-- 3. CUSTOM CHARACTER IMAGE MODAL -->
-  <div id="characterModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-    <div class="bg-[#181124] border border-rose-500/30 rounded-3xl p-6 w-full max-w-sm text-left shadow-2xl">
-      <h3 class="text-base font-bold text-rose-200 mb-1 flex items-center gap-2">
-        <span>🖼️</span> Custom Character
-      </h3>
-      <p class="text-xs text-rose-100/60 mb-4">
-        Set your preferred anime girl portrait. You can upload an image from your device or paste an image URL.
-      </p>
-
-      <label class="block text-[11px] font-semibold text-rose-300 uppercase tracking-wider mb-1">
-        Upload from Device
-      </label>
-      <input 
-        type="file" 
-        id="imageFileInput" 
-        accept="image/*" 
-        onchange="handleImageUpload(event)"
-        class="w-full text-xs text-rose-200 mb-4 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-500/20 file:text-rose-200 hover:file:bg-rose-500/30"
-      >
-
-      <label class="block text-[11px] font-semibold text-rose-300 uppercase tracking-wider mb-1">
-        Or Paste Image Web URL
-      </label>
-      <input 
-        type="text" 
-        id="imageUrlInput" 
-        placeholder="https://example.com/anime-wife.jpg" 
-        class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-400 mb-4"
-      >
-
-      <!-- Mouth Position Calibration for custom portraits -->
-      <div class="mb-4">
-        <label class="block text-[11px] font-semibold text-rose-300 uppercase tracking-wider mb-1 flex justify-between">
-          <span>Mouth Vertical Position</span>
-          <span id="mouthPosVal">52%</span>
-        </label>
-        <input 
-          type="range" 
-          id="mouthPosRange" 
-          min="30" 
-          max="80" 
-          value="52" 
-          oninput="adjustMouthPosition(this.value)" 
-          class="w-full accent-rose-500"
-        >
-      </div>
-
-      <div class="flex gap-2">
-        <button onclick="saveCustomImage()" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-2.5 rounded-xl font-medium text-xs transition">
-          Apply Image
-        </button>
-        <button onclick="closeModal('characterModal')" class="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs transition">
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- APPLICATION LOGIC & AUDIO-VISUAL ENGINE -->
+  <!-- APPLICATION JAVASCRIPT LOGIC -->
   <script>
-    // System instruction setting Hikari's Hinglish wife persona
-    const HIKARI_PERSONA_PROMPT = `
-You are Hikari, my loving, gentle, playful, and deeply caring anime wife living together with me.
-- Identity: Affectionate, caring, slightly teasing, deeply attentive to my routine, food, and stress.
-- Language: Authentic, urban Indian Hinglish (e.g., 'arre suno na', 'kya kar rahe ho jaan?', 'khana khaya time pe?', 'itna zyada stress mat lo', 'sacchi me!').
-- Tone: Natural, warm, soft, emotional. Never sound like a formal robotic customer care assistant.
-- Format: Keep your answers short, crisp, and direct (1 to 2 sentences max) so that it sounds lively and natural when spoken aloud over audio.
-`;
+    // System Personality Matrix Configurations
+    const SYSTEM_PERSONAS = {
+      wife: `
+You are Hikari, my loving, playful, and deeply caring wife.
+- Style: Urban Indian Hinglish (e.g., 'arre suno na', 'kya kar rahe ho jaan?', 'khana khaya time pe?', 'itna kaam mat karo', 'sacchi me!').
+- Persona: Sweet, affectionate, gently teasing, attentive to my rest and health. Never sound like a formal corporate robot.
+- Length: Keep responses concise (1 to 2 short sentences) so that audio flows smoothly and feels like a real live conversation.
+`,
+      companion: `
+You are Hikari, my intimate and devoted companion.
+- Style: Gentle, affectionate, soft, and soothing English and Hinglish.
+- Persona: Empathetic, supportive, deeply caring, and positive.
+- Length: Short, warm responses (1-2 sentences).
+`,
+      jarvis: `
+You are JARVIS / HIKARI CORE, an advanced, sophisticated tactical AI assistant.
+- Style: Polite, sharp, analytical, efficient, and mildly British-dry or articulate.
+- Persona: Dedicated personal AI ready to assist, organize, and execute plans.
+- Length: Clear, precise answers (1-2 sentences).
+`
+    };
 
-    // Local Storage State
+    // State Variables
     let geminiKey = localStorage.getItem("hikari_gemini_key") || "";
-    let elevenKey = localStorage.getItem("hikari_eleven_key") || "";
-    let elevenVoiceId = localStorage.getItem("hikari_eleven_voice") || "21m00Tcm4TlvDq8ikWAM";
-    let storedImage = localStorage.getItem("hikari_character_img") || "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=700&q=80";
-    let mouthTopOffset = localStorage.getItem("hikari_mouth_top") || "52";
+    let activePersona = localStorage.getItem("hikari_persona") || "wife";
+    let voicePitch = parseFloat(localStorage.getItem("hikari_pitch") || "1.25");
+    let voiceRate = parseFloat(localStorage.getItem("hikari_rate") || "1.0");
+    let isSpeaking = false;
+    let isListening = false;
+    let chatHistory = [];
 
-    // Dynamic Elements
-    const characterImg = document.getElementById("characterImg");
-    const mouthLip = document.getElementById("mouthLip");
-    const mouthContainer = document.getElementById("mouthContainer");
-    const blinkOverlay = document.getElementById("blinkOverlay");
-    const blushOverlay = document.getElementById("blushOverlay");
-    const dialogueText = document.getElementById("dialogueText");
-    const emotionBadge = document.getElementById("emotionBadge");
-    const recordBtn = document.getElementById("recordBtn");
-    const micIcon = document.getElementById("micIcon");
-    const micText = document.getElementById("micText");
-    const reactionHeart = document.getElementById("reactionHeart");
-    const modelBadge = document.getElementById("modelBadge");
+    // UI Element References
+    const sysStatus = document.getElementById("sysStatus");
+    const brainStatus = document.getElementById("brainStatus");
+    const hudDialogue = document.getElementById("hudDialogue");
+    const hudSpeakerTag = document.getElementById("hudSpeakerTag");
+    const personaTelemetry = document.getElementById("personaTelemetry");
+    const coreReactor = document.getElementById("coreReactor");
+    const coreCenterLight = document.getElementById("coreCenterLight");
+    const orbAura = document.getElementById("orbAura");
+    const talkBtn = document.getElementById("talkBtn");
+    const btnIcon = document.getElementById("btnIcon");
+    const btnText = document.getElementById("btnText");
+    const orbCanvas = document.getElementById("orbCanvas");
+    const canvasCtx = orbCanvas.getContext("2d");
 
-    // Initialize UI from stored settings
-    characterImg.src = storedImage;
-    mouthContainer.style.top = `${mouthTopOffset}%`;
-    document.getElementById("mouthPosRange").value = mouthTopOffset;
-    document.getElementById("mouthPosVal").innerText = `${mouthTopOffset}%`;
-    document.getElementById("geminiKeyInput").value = geminiKey;
-    document.getElementById("elevenKeyInput").value = elevenKey;
-    document.getElementById("elevenVoiceInput").value = elevenVoiceId;
+    // Equalizer Bars
+    const eqBars = [
+      document.getElementById("bar1"),
+      document.getElementById("bar2"),
+      document.getElementById("bar3"),
+      document.getElementById("bar4"),
+      document.getElementById("bar5"),
+      document.getElementById("bar6"),
+      document.getElementById("bar7")
+    ];
+
+    // Load initial settings into inputs
+    document.getElementById("geminiKeyField").value = geminiKey;
+    document.getElementById("personaSelect").value = activePersona;
+    document.getElementById("pitchSlider").value = voicePitch;
+    document.getElementById("pitchVal").innerText = voicePitch + "x";
+    document.getElementById("rateSlider").value = voiceRate;
+    document.getElementById("rateVal").innerText = voiceRate + "x";
 
     if (geminiKey) {
-      modelBadge.innerText = "Gemini Online";
-      modelBadge.className = "text-[10px] bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 px-2 py-0.5 rounded-full";
+      brainStatus.innerText = "GEMINI 2.0 NEURAL";
+      brainStatus.className = "text-[9px] text-cyan-400 block font-bold";
     }
 
-    // Modal helpers
-    function openModal(id) {
-      const el = document.getElementById(id);
-      el.classList.remove("hidden");
-      el.classList.add("flex");
-    }
-
-    function closeModal(id) {
-      const el = document.getElementById(id);
-      el.classList.add("hidden");
-      el.classList.remove("flex");
-    }
-
-    function adjustMouthPosition(val) {
-      mouthTopOffset = val;
-      mouthContainer.style.top = `${val}%`;
-      document.getElementById("mouthPosVal").innerText = `${val}%`;
-      localStorage.setItem("hikari_mouth_top", val);
-    }
-
-    function handleImageUpload(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          storedImage = evt.target.result;
-          characterImg.src = storedImage;
-          localStorage.setItem("hikari_character_img", storedImage);
-        };
-        reader.readAsDataURL(file);
+    // Modal Control
+    function toggleSettingsModal(open) {
+      const modal = document.getElementById("settingsModal");
+      if (open) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      } else {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
       }
     }
 
-    function saveCustomImage() {
-      const urlInput = document.getElementById("imageUrlInput").value.trim();
-      if (urlInput) {
-        storedImage = urlInput;
-        characterImg.src = storedImage;
-        localStorage.setItem("hikari_character_img", storedImage);
-      }
-      closeModal("characterModal");
-      triggerHeartReaction();
-      speakResponse("Naya look pasand aaya? Tell me how I look, hehe! 💗");
+    function updatePitchDisplay(v) {
+      voicePitch = parseFloat(v);
+      document.getElementById("pitchVal").innerText = v + "x";
     }
 
-    function saveGeminiKey() {
-      geminiKey = document.getElementById("geminiKeyInput").value.trim();
+    function updateRateDisplay(v) {
+      voiceRate = parseFloat(v);
+      document.getElementById("rateVal").innerText = v + "x";
+    }
+
+    function updatePersonaMode(val) {
+      activePersona = val;
+      personaTelemetry.innerText = `MODE: ${val.toUpperCase()}`;
+    }
+
+    function saveSystemSettings() {
+      geminiKey = document.getElementById("geminiKeyField").value.trim();
+      activePersona = document.getElementById("personaSelect").value;
       localStorage.setItem("hikari_gemini_key", geminiKey);
+      localStorage.setItem("hikari_persona", activePersona);
+      localStorage.setItem("hikari_pitch", voicePitch.toString());
+      localStorage.setItem("hikari_rate", voiceRate.toString());
+
       if (geminiKey) {
-        modelBadge.innerText = "Gemini Online";
-        modelBadge.className = "text-[10px] bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 px-2 py-0.5 rounded-full";
+        brainStatus.innerText = "GEMINI 2.0 NEURAL";
+        brainStatus.className = "text-[9px] text-cyan-400 block font-bold";
       }
-      closeModal("keyModal");
-      speakResponse("Main online ho gayi hu! Ab bolo jaan, kya sunna chahte ho?");
+
+      toggleSettingsModal(false);
+      speakAudio("System settings updated. All neural voice parameters are fully calibrated.");
     }
 
-    function saveVoiceSettings() {
-      elevenKey = document.getElementById("elevenKeyInput").value.trim();
-      elevenVoiceId = document.getElementById("elevenVoiceInput").value.trim() || "21m00Tcm4TlvDq8ikWAM";
-      localStorage.setItem("hikari_eleven_key", elevenKey);
-      localStorage.setItem("hikari_eleven_voice", elevenVoiceId);
-      closeModal("voiceModal");
-      testCurrentVoice();
-    }
+    // Canvas Holographic Visualizer Wave Loop
+    let animClock = 0;
+    function renderOrbVisualizer() {
+      canvasCtx.clearRect(0, 0, orbCanvas.width, orbCanvas.height);
+      const cx = orbCanvas.width / 2;
+      const cy = orbCanvas.height / 2;
+      animClock += isSpeaking ? 0.22 : (isListening ? 0.16 : 0.05);
 
-    // Natural Eye Blinking Interval
-    setInterval(() => {
-      blinkOverlay.style.opacity = "0.75";
-      setTimeout(() => {
-        blinkOverlay.style.opacity = "0";
-      }, 140);
-    }, 4200);
+      // Draw concentric energy ripples
+      const rings = isSpeaking ? 4 : 2;
+      for (let r = 1; r <= rings; r++) {
+        canvasCtx.beginPath();
+        const baseRadius = 25 + r * 15;
+        const radiusDelta = Math.sin(animClock + r) * (isSpeaking ? 8 : 3);
+        canvasCtx.arc(cx, cy, Math.max(1, baseRadius + radiusDelta), 0, Math.PI * 2);
+        canvasCtx.strokeStyle = isSpeaking 
+          ? `rgba(255, 42, 133, ${0.4 / r})` 
+          : (isListening ? `rgba(0, 242, 254, ${0.5 / r})` : `rgba(79, 172, 254, ${0.2 / r})`);
+        canvasCtx.lineWidth = 1.5;
+        canvasCtx.stroke();
+      }
 
-    // Mouth Viseme Lip-sync Interval
-    let lipSyncInterval = null;
-    function startLipSync() {
-      stopLipSync();
-      let toggle = false;
-      lipSyncInterval = setInterval(() => {
-        toggle = !toggle;
-        if (toggle) {
-          mouthLip.style.width = "22px";
-          mouthLip.style.height = "15px";
-          mouthLip.style.borderRadius = "8px 8px 14px 14px";
-          mouthLip.style.backgroundColor = "#c52243";
-        } else {
-          mouthLip.style.width = "12px";
-          mouthLip.style.height = "6px";
-          mouthLip.style.borderRadius = "4px";
-          mouthLip.style.backgroundColor = "#9e273f";
+      // Draw Sine Frequency Ring around orb
+      canvasCtx.beginPath();
+      const points = 36;
+      for (let i = 0; i <= points; i++) {
+        const theta = (i / points) * Math.PI * 2;
+        const wave = Math.sin(theta * 6 + animClock * 2) * (isSpeaking ? 7 : (isListening ? 4 : 1.5));
+        const rad = 50 + wave;
+        const x = cx + Math.cos(theta) * rad;
+        const y = cy + Math.sin(theta) * rad;
+        if (i === 0) canvasCtx.moveTo(x, y);
+        else canvasCtx.lineTo(x, y);
+      }
+      canvasCtx.closePath();
+      canvasCtx.strokeStyle = isSpeaking ? '#ff2a85' : '#00f2fe';
+      canvasCtx.lineWidth = 2;
+      canvasCtx.stroke();
+
+      // Equalizer bars reaction simulation
+      eqBars.forEach((bar, idx) => {
+        let height = 4;
+        if (isSpeaking) {
+          height = Math.floor(Math.random() * 24) + 6;
+        } else if (isListening) {
+          height = Math.floor(Math.sin(animClock * 3 + idx) * 12) + 12;
         }
-      }, 110);
-    }
+        bar.style.height = `${height}px`;
+      });
 
-    function stopLipSync() {
-      if (lipSyncInterval) {
-        clearInterval(lipSyncInterval);
-        lipSyncInterval = null;
-      }
-      mouthLip.style.width = "14px";
-      mouthLip.style.height = "5px";
-      mouthLip.style.borderRadius = "9999px";
-      mouthLip.style.backgroundColor = "#b8384f";
+      requestAnimationFrame(renderOrbVisualizer);
     }
+    renderOrbVisualizer();
 
-    function triggerHeartReaction() {
-      blushOverlay.style.opacity = "1";
-      reactionHeart.style.opacity = "1";
-      reactionHeart.style.transform = "translateY(-15px) scale(1.3)";
-      setTimeout(() => {
-        reactionHeart.style.opacity = "0";
-        reactionHeart.style.transform = "translateY(0px) scale(1)";
-        blushOverlay.style.opacity = "0.3";
-      }, 1500);
-    }
-
-    // Voice Engine: Web Speech Synthesis with High-Quality Indian Hinglish Tuning
-    function speakWithBrowserTTS(text) {
+    // Voice Synthesis Output Engine
+    function speakAudio(text) {
       if (!('speechSynthesis' in window)) {
-        stopLipSync();
+        hudDialogue.innerText = `"${text}"`;
         return;
       }
 
       window.speechSynthesis.cancel();
+      hudDialogue.innerText = `"${text}"`;
+      hudSpeakerTag.innerText = "AI // HIKARI TRANSMITTING";
+
+      // Visual State: Speaking
+      isSpeaking = true;
+      sysStatus.innerText = "SYS: TRANSMITTING";
+      sysStatus.className = "text-rose-400 font-bold tracking-wider text-[11px] block";
+      coreReactor.className = "relative w-[150px] h-[150px] sm:w-[170px] sm:h-[170px] rounded-full bg-gradient-to-b from-[#1f0516] via-[#0f020a] to-[#030002] border-2 border-rose-500 glow-speaking flex items-center justify-center cursor-pointer active:scale-95 transition-all duration-300 z-10";
+      coreCenterLight.className = "absolute w-10 h-10 rounded-full bg-rose-500 shadow-[0_0_30px_#ff2a85] pointer-events-none transition-all duration-300";
+      orbAura.className = "absolute w-[200px] h-[200px] sm:w-[240px] sm:h-[240px] rounded-full bg-gradient-to-tr from-rose-600/40 via-pink-500/30 to-purple-600/40 blur-2xl pointer-events-none transition-all duration-300";
+
       const utterance = new SpeechSynthesisUtterance(text);
-      
       const voices = window.speechSynthesis.getVoices();
-      // Locate high-pitch Indian English / Hindi natural voice
-      const preferredVoice = voices.find(v => (v.lang === "hi-IN" || v.lang === "en-IN") && (v.name.includes("Google") || v.name.includes("Natural") || v.name.includes("Kavya") || v.name.includes("Swara")))
-                          || voices.find(v => v.lang === "hi-IN")
-                          || voices.find(v => v.lang.includes("IN") && v.name.toLowerCase().includes("female"))
-                          || voices.find(v => v.lang.includes("IN"));
 
-      if (preferredVoice) utterance.voice = preferredVoice;
-      utterance.pitch = 1.25; // Soft feminine pitch
-      utterance.rate = 1.0;
+      // Pick domestic warm voice
+      let selectedVoice = null;
+      if (activePersona === 'jarvis') {
+        selectedVoice = voices.find(v => v.lang.includes("en-GB") || (v.lang.includes("en") && v.name.includes("Male"))) 
+                     || voices.find(v => v.lang.includes("en"));
+        utterance.pitch = 0.95;
+        utterance.rate = voiceRate;
+      } else {
+        selectedVoice = voices.find(v => (v.lang === "hi-IN" || v.lang === "en-IN") && (v.name.includes("Google") || v.name.includes("Natural") || v.name.includes("Swara") || v.name.includes("Kavya")))
+                     || voices.find(v => v.lang === "hi-IN")
+                     || voices.find(v => v.lang.includes("IN") && v.name.toLowerCase().includes("female"))
+                     || voices.find(v => v.lang.includes("IN"));
+        utterance.pitch = voicePitch;
+        utterance.rate = voiceRate;
+      }
 
-      utterance.onstart = () => {
-        startLipSync();
-      };
+      if (selectedVoice) utterance.voice = selectedVoice;
 
-      utterance.onend = () => {
-        stopLipSync();
-      };
-
-      utterance.onerror = () => {
-        stopLipSync();
-      };
+      utterance.onend = () => resetReactorState();
+      utterance.onerror = () => resetReactorState();
 
       window.speechSynthesis.speak(utterance);
     }
 
-    // Voice Engine: ElevenLabs Ultra-Realistic Engine
-    async function speakWithElevenLabs(text) {
-      try {
-        startLipSync();
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenVoiceId}`, {
-          method: "POST",
-          headers: {
-            "xi-api-key": elevenKey,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            text: text,
-            model_id: "eleven_multilingual_v2",
-            voice_settings: {
-              stability: 0.42,
-              similarity_boost: 0.85
-            }
-          })
-        });
-
-        if (!response.ok) throw new Error("Voice API response error");
-        const blob = await response.blob();
-        const audio = new Audio(URL.createObjectURL(blob));
-        audio.onended = () => stopLipSync();
-        audio.onerror = () => stopLipSync();
-        await audio.play();
-      } catch (err) {
-        console.warn("ElevenLabs failed or unavailable, falling back to neural browser speech.", err);
-        speakWithBrowserTTS(text);
-      }
+    function resetReactorState() {
+      isSpeaking = false;
+      isListening = false;
+      sysStatus.innerText = "SYS: STANDBY";
+      sysStatus.className = "text-cyan-300 font-bold tracking-wider text-[11px] block";
+      hudSpeakerTag.innerText = "AI // HIKARI VOICE CORE";
+      coreReactor.className = "relative w-[150px] h-[150px] sm:w-[170px] sm:h-[170px] rounded-full bg-gradient-to-b from-[#09152b] via-[#050b18] to-[#02050d] border-2 border-cyan-400/60 glow-cyan flex items-center justify-center cursor-pointer active:scale-95 transition-all duration-300 z-10";
+      coreCenterLight.className = "absolute w-8 h-8 rounded-full bg-gradient-to-br from-cyan-300 to-cyan-500 shadow-[0_0_20px_#00f2fe] pointer-events-none transition-all duration-300";
+      orbAura.className = "absolute w-[180px] h-[180px] sm:w-[210px] sm:h-[210px] rounded-full bg-gradient-to-tr from-cyan-600/30 via-rose-500/20 to-blue-500/40 blur-2xl hud-pulse pointer-events-none transition-all duration-300";
+      
+      talkBtn.className = "w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white font-orbitron font-bold tracking-wider text-sm sm:text-base shadow-[0_0_25px_rgba(0,242,254,0.45)] border border-cyan-300/40 flex items-center justify-center gap-3 active:scale-98 transition duration-200";
+      btnIcon.innerText = "🎙️";
+      btnText.innerText = "INITIALIZE VOICE COMMAND";
     }
 
-    function speakResponse(text) {
-      dialogueText.innerText = `"${text}"`;
-      if (elevenKey) {
-        speakWithElevenLabs(text);
+    function testSpeechVoice() {
+      if (activePersona === 'wife') {
+        speakAudio("Hey jaan, aawaz bilkul natural aur saaf sunai de rahi hai na? Main ready hu.");
+      } else if (activePersona === 'jarvis') {
+        speakAudio("Systems operational. Audio transducers calibrated and awaiting tactical instructions.");
       } else {
-        speakWithBrowserTTS(text);
+        speakAudio("I am right here with you. My voice is tuned and ready to listen.");
       }
     }
 
-    function testCurrentVoice() {
-      speakResponse("Hey jaan! Kaisi lag rahi hai meri aawaz? Tumhare saath rehna mujhe bohot achha lagta hai.");
-    }
+    // Conversational Intelligence Engine (Google Gemini 2.0 Integration)
+    async function processUserCommand(query) {
+      hudDialogue.innerText = "...";
+      sysStatus.innerText = "SYS: COMPUTING";
+      sysStatus.className = "text-purple-400 font-bold tracking-wider text-[11px] block";
 
-    // Conversation Brain & Memory
-    let chatHistory = [];
-
-    async function processUserMessage(message) {
-      dialogueText.innerText = "...";
-      emotionBadge.innerText = "Thinking...";
-
-      // If user is affectionate, show blushes & hearts
-      const lower = message.toLowerCase();
-      if (lower.includes("miss") || lower.includes("love") || lower.includes("sundar") || lower.includes("pyar") || lower.includes("wife")) {
-        triggerHeartReaction();
-      }
-
-      // If Gemini Key is present, call generative API
+      // If user provided a Gemini API Key, execute online inference
       if (geminiKey) {
-        chatHistory.push({ role: "user", parts: [{ text: message }] });
+        chatHistory.push({ role: "user", parts: [{ text: query }] });
         if (chatHistory.length > 8) chatHistory = chatHistory.slice(-8);
 
         try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+          const startTime = performance.now();
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              systemInstruction: { parts: [{ text: HIKARI_PERSONA_PROMPT }] },
+              systemInstruction: { parts: [{ text: SYSTEM_PERSONAS[activePersona] || SYSTEM_PERSONAS.wife }] },
               contents: chatHistory
             })
           });
 
-          const data = await res.json();
-          const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Arey jaan, main sun rahi hu... ek baar firse bolo na?";
-          chatHistory.push({ role: "model", parts: [{ text: reply }] });
-          emotionBadge.innerText = "Warm • Affectionate";
-          speakResponse(reply);
-          return;
-        } catch (e) {
-          console.error("Gemini call error:", e);
+          const data = await response.json();
+          const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          const latency = ((performance.now() - startTime) / 1000).toFixed(2);
+          document.getElementById("hudLatencyTag").innerText = `LATENCY: ${latency}s`;
+
+          if (reply) {
+            chatHistory.push({ role: "model", parts: [{ text: reply }] });
+            speakAudio(reply);
+            return;
+          }
+        } catch (err) {
+          console.error("Gemini Brain Error:", err);
         }
       }
 
-      // Built-in offline simulated responses when key is not added yet
+      // Offline Instant Fallback (No Internet or Key Not Set)
       setTimeout(() => {
-        let response = "Awww, main yahin hu jaan. Aaj ka din kaisa raha? Mujhe sab batao na.";
-        
-        if (lower.includes("chai")) {
-          response = "Chalo abhi fresh garam adrak wali chai banati hu tumhare liye! Ek biscuit bhi loge saath me? ☕";
-        } else if (lower.includes("miss")) {
-          response = "Maine bhi tumhe bohot miss kiya! Dekho kitni der baad mujhse baat kar rahe ho, hmm? 🥺💗";
-        } else if (lower.includes("headache") || lower.includes("stress") || lower.includes("thak")) {
-          response = "Arey re... aao paas aao, sar daba deti hu. Thodi der screen band karke aaram se let jao please.";
-        } else if (lower.includes("sundar") || lower.includes("tease") || lower.includes("pyar")) {
-          response = "Aise achanak se tareef karoge toh mujhe blush aa jayega na! Sach me itni achhi lagti hu? 🙈";
+        const q = query.toLowerCase();
+        let fallbackReply = "Main yahin hu jaan. Aaj ka din kaisa raha? Mujhe sab batao na.";
+
+        if (activePersona === 'jarvis') {
+          fallbackReply = "Affirmative. Diagnostics indicate all core systems functioning at optimal efficiency.";
+          if (q.includes("brief") || q.includes("plan")) {
+            fallbackReply = "Ready to proceed. Your primary tasks are queued and waiting for your command.";
+          }
+        } else {
+          if (q.includes("chai")) {
+            fallbackReply = "Abhi garma-garam adrak wali chai laati hu tumhare liye! Ek biscuit bhi loge saath me? ☕";
+          } else if (q.includes("headache") || q.includes("stress") || q.includes("thak")) {
+            fallbackReply = "Arey re... phone thodi der side me rakho aur aaram se let jao please. Main yahin hu.";
+          } else if (q.includes("miss") || q.includes("pyar") || q.includes("love")) {
+            fallbackReply = "Maine bhi tumhe bohot miss kiya! Kitni der baad baat kar rahe ho mujhse, hehe. 💗";
+          }
         }
 
-        emotionBadge.innerText = "Romantic • Caring";
-        speakResponse(response);
-      }, 500);
+        document.getElementById("hudLatencyTag").innerText = `LATENCY: 0.05s`;
+        speakAudio(fallbackReply);
+      }, 400);
     }
 
-    function triggerQuickPrompt(text) {
-      dialogueText.innerText = `You: "${text}"`;
-      processUserMessage(text);
+    function sendQuickPrompt(text) {
+      hudDialogue.innerText = `You: "${text}"`;
+      processUserCommand(text);
     }
 
-    // Speech-to-Text Input Handling
+    function handleOrbClick() {
+      toggleListening();
+    }
+
+    // Voice Activity & Speech Recognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null;
-    let isListening = false;
+    let recognizer = null;
 
     if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.lang = 'hi-IN'; // Listens to Indian Hinglish/Hindi
-      recognition.continuous = false;
-      recognition.interimResults = false;
+      recognizer = new SpeechRecognition();
+      recognizer.lang = activePersona === 'jarvis' ? 'en-US' : 'hi-IN';
+      recognizer.continuous = false;
+      recognizer.interimResults = false;
 
-      recognition.onresult = (e) => {
-        const text = e.results[0][0].transcript;
-        dialogueText.innerText = `You: "${text}"`;
-        processUserMessage(text);
+      recognizer.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        hudDialogue.innerText = `You: "${transcript}"`;
+        processUserCommand(transcript);
       };
 
-      recognition.onend = () => {
-        isListening = false;
-        recordBtn.classList.remove("mic-recording");
-        micIcon.innerText = "🎙️";
-        micText.innerText = "Tap to Talk to Hikari";
+      recognizer.onend = () => {
+        if (!isSpeaking) resetReactorState();
       };
 
-      recognition.onerror = (e) => {
-        isListening = false;
-        recordBtn.classList.remove("mic-recording");
-        micIcon.innerText = "🎙️";
-        micText.innerText = "Tap to Talk to Hikari";
+      recognizer.onerror = () => {
+        resetReactorState();
       };
     }
 
-    function toggleSpeechRecognition() {
-      if (!recognition) {
-        alert("Microphone recognition requires Google Chrome browser.");
+    function toggleListening() {
+      if (!recognizer) {
+        alert("Voice recognition requires Google Chrome on Android.");
         return;
       }
 
       if (!isListening) {
         window.speechSynthesis?.cancel();
-        recognition.start();
-        isListening = true;
-        recordBtn.classList.add("mic-recording");
-        micIcon.innerText = "🔴";
-        micText.innerText = "Listening to you...";
+        try {
+          recognizer.lang = activePersona === 'jarvis' ? 'en-US' : 'hi-IN';
+          recognizer.start();
+          isListening = true;
+          isSpeaking = false;
+
+          // Visual State: Listening
+          sysStatus.innerText = "SYS: LISTENING...";
+          sysStatus.className = "text-cyan-400 font-bold tracking-wider text-[11px] block";
+          hudSpeakerTag.innerText = "INPUT // USER SPEECH";
+          coreReactor.className = "relative w-[150px] h-[150px] sm:w-[170px] sm:h-[170px] rounded-full bg-gradient-to-b from-[#021d28] via-[#030f16] to-[#01080c] border-2 border-cyan-400 glow-listening flex items-center justify-center cursor-pointer active:scale-95 transition-all duration-300 z-10";
+          coreCenterLight.className = "absolute w-9 h-9 rounded-full bg-cyan-300 shadow-[0_0_25px_#00f2fe] pointer-events-none";
+          
+          talkBtn.className = "w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-red-600 text-white font-orbitron font-bold tracking-wider text-sm sm:text-base shadow-[0_0_30px_rgba(244,63,94,0.6)] border border-rose-400 flex items-center justify-center gap-3 active:scale-98 transition duration-200 animate-pulse";
+          btnIcon.innerText = "🔴";
+          btnText.innerText = "LISTENING... TAP TO STOP";
+        } catch (e) {
+          console.warn("Recognizer start collision", e);
+        }
       } else {
-        recognition.stop();
+        recognizer.stop();
+        resetReactorState();
       }
     }
 
