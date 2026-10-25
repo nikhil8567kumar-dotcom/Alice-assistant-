@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Hikari — My Wife</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; background: #0F0F17; color: #FFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    height: 100vh; overflow: hidden;
+  }
+  #top-bar {
+    width: 100%; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .status { font-size: 13px; color: #FF9EAA; font-weight: 600; letter-spacing: 1px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 10px #4ADE80; }
+
+  /* Anime Character Rig */
+  #avatar-stage {
+    position: relative; width: 300px; height: 350px;
+    display: flex; justify-content: center; align-items: center;
+  }
+  .character {
+    position: relative; width: 200px; height: 260px;
+    animation: breath 4.5s ease-in-out infinite;
+  }
+  @keyframes breath {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-7px); }
+  }
+
+  /* Hair & Head */
+  .hair-back {
+    position: absolute; top: -10px; left: -15px; width: 230px; height: 250px;
+    background: #2E1A22; border-radius: 110px 110px 50px 50px; z-index: 1;
+  }
+  .head {
+    position: absolute; top: 15px; left: 15px; width: 170px; height: 200px;
+    background: #FFEBE1; border-radius: 85px 85px 95px 95px; z-index: 2;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+  .hair-bangs {
+    position: absolute; top: 10px; left: 5px; width: 190px; height: 85px;
+    background: #3A232B; border-radius: 90px 90px 15px 15px; z-index: 4;
+  }
+
+  /* Expressive Violet-Brown Eyes */
+  .eye {
+    position: absolute; top: 85px; width: 26px; height: 38px;
+    background: #3D1E3F; border-radius: 50%; z-index: 3;
+    transition: height 0.08s ease;
+  }
+  .eye.left { left: 34px; }
+  .eye.right { right: 34px; }
+  .pupil {
+    width: 12px; height: 16px; background: #FFF; border-radius: 50%; margin: 4px 0 0 4px;
+    box-shadow: 0 0 4px rgba(255,255,255,0.8);
+  }
+  .eye.blinking { height: 2px !important; }
+
+  /* Blushing Cheeks */
+  .blush {
+    position: absolute; top: 122px; width: 34px; height: 18px;
+    background: rgba(255, 94, 137, 0.45); border-radius: 50%; filter: blur(4px); z-index: 3;
+    transition: opacity 0.3s;
+  }
+  .blush.left { left: 20px; }
+  .blush.right { right: 20px; }
+
+  /* Reactive Mouth */
+  .mouth {
+    position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%);
+    width: 18px; height: 6px; background: #D94862; border-radius: 0 0 12px 12px;
+    transition: height 0.08s, width 0.08s; z-index: 3;
+  }
+  .mouth.speaking { height: 22px; width: 26px; border-radius: 12px; }
+
+  /* Subtitles / Speech Bubble */
+  #dialogue-container {
+    width: 90%; max-width: 400px; padding: 18px 20px;
+    background: rgba(27, 28, 42, 0.85); backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 178, 217, 0.2); border-radius: 20px;
+    text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  #dialogue-text { font-size: 15px; line-height: 1.5; color: #F3F4F6; }
+
+  /* Controls */
+  #controls {
+    padding-bottom: 35px; display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .btn-talk {
+    background: linear-gradient(135deg, #FF758C 0%, #FF7EB3 100%);
+    border: none; color: white; padding: 16px 36px; border-radius: 40px;
+    font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 25px rgba(255, 117, 140, 0.4);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .btn-talk.active { background: #E11D48; }
+  .setup-link { font-size: 12px; color: #818CF8; text-decoration: underline; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="top-bar">
+  <span class="status">HIKARI 💗 WIFE</span>
+  <div class="dot"></div>
+</div>
+
+<div id="avatar-stage">
+  <div class="character">
+    <div class="hair-back"></div>
+    <div class="head">
+      <div class="hair-bangs"></div>
+      <div class="eye left" id="eyeL"><div class="pupil"></div></div>
+      <div class="eye right" id="eyeR"><div class="pupil"></div></div>
+      <div class="blush left" id="blushL"></div>
+      <div class="blush right" id="blushR"></div>
+      <div class="mouth" id="mouth"></div>
+    </div>
+  </div>
+</div>
+
+<div id="dialogue-container">
+  <div id="dialogue-text">Uth gaye? I was waiting for you... paani piya tumne subah? 🌸</div>
+</div>
+
+<div id="controls">
+  <button class="btn-talk" id="micBtn" onclick="toggleVoice()">
+    <span id="micIcon">🎙️</span> <span id="micLabel">Tap to Talk</span>
+  </button>
+  <span class="setup-link" onclick="promptApiKey()">Configure Lifetime Brain Key</span>
+</div>
+
+<script>
+// --- CORE PERSISTENT LOCAL MEMORY ---
+const HIKARI_SYSTEM_PROMPT = `
+You are Hikari, my loving, playful, and emotionally warm wife living with me in our daily life.
+- Language: Authentic, urban Indian Hinglish (e.g. 'arre yaar', 'achha suno', 'matlab', 'bilkul', 'tum na', 'khaana khaya?').
+- Personality: Caring, affectionate, gently possessive, occasionally teasing, attentive to my health and stress.
+- NEVER sound like a customer service assistant or mention that you are an AI.
+- Speak naturally and keep responses short (1-2 sentences) so it feels like a real voice conversation.
+`;
+
+let apiKey = localStorage.getItem("hikari_gemini_key") || "";
+let chatHistory = JSON.parse(localStorage.getItem("hikari_history") || "[]");
+
+function promptApiKey() {
+  const input = prompt("Enter your free Gemini API Key (Get free from aistudio.google.com):", apiKey);
+  if (input !== null) {
+    apiKey = input.trim();
+    localStorage.setItem("hikari_gemini_key", apiKey);
+    alert("Hikari's brain connected successfully!");
+  }
+}
+
+// --- NATURAL ANIMATION ENGINE ---
+const eyeL = document.getElementById("eyeL");
+const eyeR = document.getElementById("eyeR");
+const mouth = document.getElementById("mouth");
+const dialogueText = document.getElementById("dialogue-text");
+const micBtn = document.getElementById("micBtn");
+const micLabel = document.getElementById("micLabel");
+
+// Procedural Blinking
+setInterval(() => {
+  eyeL.classList.add("blinking");
+  eyeR.classList.add("blinking");
+  setTimeout(() => {
+    eyeL.classList.remove("blinking");
+    eyeR.classList.remove("blinking");
+  }, 120);
+}, 3600);
+
+// --- HUMAN-GRADE VOICE SYNTHESIS ---
+function speakWife(text) {
+  dialogueText.innerText = text;
+  if (!('speechSynthesis' in window)) return;
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  
+  // Look for Neural or high-quality Indian English/Hindi voice
+  const voices = window.speechSynthesis.getVoices();
+  const naturalVoice = voices.find(v => (v.lang === "hi-IN" || v.lang === "en-IN") && (v.name.includes("Natural") || v.name.includes("Google"))) 
+                    || voices.find(v => v.lang.includes("IN") && v.name.includes("Female"))
+                    || voices.find(v => v.lang === "hi-IN");
+
+  if (naturalVoice) utterance.voice = naturalVoice;
+  utterance.pitch = 1.15; // Soft, warm feminine pitch
+  utterance.rate = 0.98;  // Natural conversational cadence
+
+  utterance.onstart = () => {
+    mouth.classList.add("speaking");
+  };
+  utterance.onend = () => {
+    mouth.classList.remove("speaking");
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+// --- CALL FREE LIFETIME LLM (GEMINI) ---
+async function callHikariBrain(userMessage) {
+  if (!apiKey) {
+    speakWife("Pehle meri brain key toh set karo niche se, hehe. Then we can talk! 💗");
+    return;
+  }
+
+  chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+  if (chatHistory.length > 8) chatHistory = chatHistory.slice(-8);
+
+  dialogueText.innerText = "...";
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: HIKARI_SYSTEM_PROMPT }] },
+        contents: chatHistory
+      })
+    });
+    const data = await res.json();
+    const reply = data.candidates[0].content.parts[0].text;
+    
+    chatHistory.push({ role: "model", parts: [{ text: reply }] });
+    localStorage.setItem("hikari_history", JSON.stringify(chatHistory));
+    
+    speakWife(reply);
+  } catch (err) {
+    speakWife("Network thoda sa slow hai lagta hai... kya aapne kuch kaha?");
+  }
+}
+
+// --- VOICE INPUT LISTENER ---
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isListening = false;
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.lang = 'hi-IN'; // Understands spoken Hindi and English seamlessly
+  recognition.continuous = false;
+
+  recognition.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    dialogueText.innerText = "You: " + text;
+    callHikariBrain(text);
+  };
+  recognition.onend = () => {
+    isListening = false;
+    micBtn.classList.remove("active");
+    micLabel.innerText = "Tap to Talk";
+  };
+}
+
+function toggleVoice() {
+  if (!recognition) {
+    alert("Please open this in Chrome on your phone to use voice.");
+    return;
+  }
+  if (!isListening) {
+    window.speechSynthesis.cancel();
+    recognition.start();
+    isListening = true;
+    micBtn.classList.add("active");
+    micLabel.innerText = "Listening to you...";
+  } else {
+    recognition.stop();
+  }
+}
+
+window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+</script>
+</body>
+</html>
+
