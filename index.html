@@ -3,269 +3,356 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Hikari — My Wife</title>
+<title>Hikari — Anime Wife</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
-    margin: 0; background: #0F0F17; color: #FFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0; background: radial-gradient(circle at 50% 30%, #20182E 0%, #0D0B14 100%);
+    color: #FFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     display: flex; flex-direction: column; align-items: center; justify-content: space-between;
     height: 100vh; overflow: hidden;
   }
-  #top-bar {
+  
+  #header {
     width: 100%; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center;
   }
-  .status { font-size: 13px; color: #FF9EAA; font-weight: 600; letter-spacing: 1px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 10px #4ADE80; }
+  .title { font-size: 13px; color: #FFAAA6; font-weight: 700; letter-spacing: 2px; }
+  .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 10px #4ADE80; }
 
-  /* Anime Character Rig */
-  #avatar-stage {
-    position: relative; width: 300px; height: 350px;
+  /* --- BEAUTIFUL ANIME AVATAR CANVAS RIG --- */
+  #stage {
+    position: relative; width: 320px; height: 380px;
     display: flex; justify-content: center; align-items: center;
   }
-  .character {
-    position: relative; width: 200px; height: 260px;
-    animation: breath 4.5s ease-in-out infinite;
+  .character-rig {
+    position: relative; width: 280px; height: 360px;
+    animation: idleBreathe 4s ease-in-out infinite;
   }
-  @keyframes breath {
+  @keyframes idleBreathe {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-7px); }
+    50% { transform: translateY(-7px) scale(1.008); }
   }
 
-  /* Hair & Head */
+  /* Back Flowing Hair */
   .hair-back {
-    position: absolute; top: -10px; left: -15px; width: 230px; height: 250px;
-    background: #2E1A22; border-radius: 110px 110px 50px 50px; z-index: 1;
+    position: absolute; top: 15px; left: 10px; width: 260px; height: 340px;
+    background: linear-gradient(180deg, #2A1725 0%, #150B13 100%);
+    border-radius: 130px 130px 70px 70px; z-index: 1;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
   }
-  .head {
-    position: absolute; top: 15px; left: 15px; width: 170px; height: 200px;
-    background: #FFEBE1; border-radius: 85px 85px 95px 95px; z-index: 2;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  
+  /* Neck & Collar */
+  .neck {
+    position: absolute; bottom: 85px; left: 122px; width: 36px; height: 50px;
+    background: #FFDFC9; z-index: 2;
   }
-  .hair-bangs {
-    position: absolute; top: 10px; left: 5px; width: 190px; height: 85px;
-    background: #3A232B; border-radius: 90px 90px 15px 15px; z-index: 4;
+  .collar {
+    position: absolute; bottom: 45px; left: 65px; width: 150px; height: 60px;
+    background: #E8D6E5; border-radius: 40px 40px 10px 10px; z-index: 2;
+    border-top: 4px solid #C4A2BF;
   }
 
-  /* Expressive Violet-Brown Eyes */
+  /* Head & Face */
+  .face {
+    position: absolute; top: 55px; left: 52px; width: 176px; height: 196px;
+    background: linear-gradient(180deg, #FFF0E8 0%, #FFE2D4 100%);
+    border-radius: 88px 88px 95px 95px; z-index: 3;
+    box-shadow: 0 8px 25px rgba(35, 15, 30, 0.25);
+  }
+
+  /* Front Bangs & Side Locks */
+  .bangs {
+    position: absolute; top: 38px; left: 42px; width: 196px; height: 110px;
+    background: #2D1A27; border-radius: 98px 98px 20px 20px; z-index: 5;
+    clip-path: polygon(0 0, 100% 0, 95% 70%, 82% 55%, 70% 85%, 52% 60%, 40% 90%, 25% 65%, 10% 80%);
+  }
+  .sidelock-left {
+    position: absolute; top: 95px; left: 32px; width: 26px; height: 170px;
+    background: #23131F; border-radius: 10px 0 25px 8px; z-index: 5;
+  }
+  .sidelock-right {
+    position: absolute; top: 95px; right: 32px; width: 26px; height: 170px;
+    background: #23131F; border-radius: 0 10px 8px 25px; z-index: 5;
+  }
+
+  /* Anime Eyes */
   .eye {
-    position: absolute; top: 85px; width: 26px; height: 38px;
-    background: #3D1E3F; border-radius: 50%; z-index: 3;
-    transition: height 0.08s ease;
+    position: absolute; top: 92px; width: 34px; height: 42px;
+    background: #1F0D24; border-radius: 50%; z-index: 4;
+    overflow: hidden; border-top: 3.5px solid #000;
+    transition: transform 0.08s ease, height 0.08s ease;
   }
-  .eye.left { left: 34px; }
-  .eye.right { right: 34px; }
-  .pupil {
-    width: 12px; height: 16px; background: #FFF; border-radius: 50%; margin: 4px 0 0 4px;
-    box-shadow: 0 0 4px rgba(255,255,255,0.8);
+  .eye.left { left: 32px; }
+  .eye.right { right: 32px; }
+  
+  .iris {
+    position: absolute; bottom: 2px; left: 4px; width: 26px; height: 32px;
+    background: radial-gradient(circle at 50% 30%, #BA68C8 0%, #4A154B 75%);
+    border-radius: 50%;
   }
-  .eye.blinking { height: 2px !important; }
+  .pupil-sparkle {
+    position: absolute; top: 4px; left: 5px; width: 9px; height: 11px;
+    background: #FFFFFF; border-radius: 50%; filter: drop-shadow(0 0 2px #FFF);
+  }
+  .pupil-subsparkle {
+    position: absolute; bottom: 6px; right: 5px; width: 5px; height: 5px;
+    background: #E1BEE7; border-radius: 50%;
+  }
+  .blinking { height: 2px !important; margin-top: 20px; }
 
   /* Blushing Cheeks */
   .blush {
-    position: absolute; top: 122px; width: 34px; height: 18px;
-    background: rgba(255, 94, 137, 0.45); border-radius: 50%; filter: blur(4px); z-index: 3;
-    transition: opacity 0.3s;
+    position: absolute; top: 126px; width: 32px; height: 16px;
+    background: radial-gradient(circle, rgba(255, 75, 120, 0.5) 0%, rgba(255, 75, 120, 0) 75%);
+    border-radius: 50%; z-index: 4;
   }
   .blush.left { left: 20px; }
   .blush.right { right: 20px; }
 
-  /* Reactive Mouth */
+  /* Cute Expression Mouth */
+  .mouth-wrap {
+    position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
+    z-index: 4; display: flex; justify-content: center;
+  }
   .mouth {
-    position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%);
-    width: 18px; height: 6px; background: #D94862; border-radius: 0 0 12px 12px;
-    transition: height 0.08s, width 0.08s; z-index: 3;
+    width: 14px; height: 5px; background: #C23957;
+    border-radius: 0 0 10px 10px; transition: all 0.08s ease;
   }
-  .mouth.speaking { height: 22px; width: 26px; border-radius: 12px; }
+  .mouth.speaking {
+    width: 22px; height: 18px; border-radius: 8px 8px 14px 14px;
+    background: #A92342; border-top: 3px solid #FFF;
+  }
 
-  /* Subtitles / Speech Bubble */
-  #dialogue-container {
-    width: 90%; max-width: 400px; padding: 18px 20px;
-    background: rgba(27, 28, 42, 0.85); backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 178, 217, 0.2); border-radius: 20px;
-    text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  /* Subtitles Box */
+  #dialogue-card {
+    width: 88%; max-width: 380px; padding: 18px 20px;
+    background: rgba(26, 21, 38, 0.85); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 170, 166, 0.25); border-radius: 20px;
+    text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   }
-  #dialogue-text { font-size: 15px; line-height: 1.5; color: #F3F4F6; }
+  #speech-text { font-size: 15px; line-height: 1.5; color: #FCEEF5; min-height: 42px; }
 
   /* Controls */
-  #controls {
-    padding-bottom: 35px; display: flex; flex-direction: column; align-items: center; gap: 12px;
-  }
+  #controls { padding-bottom: 28px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
   .btn-talk {
-    background: linear-gradient(135deg, #FF758C 0%, #FF7EB3 100%);
-    border: none; color: white; padding: 16px 36px; border-radius: 40px;
-    font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 25px rgba(255, 117, 140, 0.4);
-    display: flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, #FF6584 0%, #FF8E9E 100%);
+    border: none; color: white; padding: 15px 36px; border-radius: 35px;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 8px 25px rgba(255, 101, 132, 0.45); display: flex; align-items: center; gap: 10px;
   }
-  .btn-talk.active { background: #E11D48; }
-  .setup-link { font-size: 12px; color: #818CF8; text-decoration: underline; cursor: pointer; }
+  .btn-talk.listening { background: #E11D48; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  .settings-row { display: flex; gap: 15px; }
+  .config-btn { font-size: 11px; color: #B39DDB; background: none; border: none; text-decoration: underline; cursor: pointer; }
 </style>
 </head>
 <body>
 
-<div id="top-bar">
-  <span class="status">HIKARI 💗 WIFE</span>
-  <div class="dot"></div>
+<div id="header">
+  <span class="title">HIKARI 💗 WIFE</span>
+  <div class="pulse-dot"></div>
 </div>
 
-<div id="avatar-stage">
-  <div class="character">
+<div id="stage">
+  <div class="character-rig">
     <div class="hair-back"></div>
-    <div class="head">
-      <div class="hair-bangs"></div>
-      <div class="eye left" id="eyeL"><div class="pupil"></div></div>
-      <div class="eye right" id="eyeR"><div class="pupil"></div></div>
-      <div class="blush left" id="blushL"></div>
-      <div class="blush right" id="blushR"></div>
-      <div class="mouth" id="mouth"></div>
+    <div class="neck"></div>
+    <div class="collar"></div>
+    <div class="sidelock-left"></div>
+    <div class="sidelock-right"></div>
+    
+    <div class="face">
+      <div class="eye left" id="eyeL">
+        <div class="iris"><div class="pupil-sparkle"></div><div class="pupil-subsparkle"></div></div>
+      </div>
+      <div class="eye right" id="eyeR">
+        <div class="iris"><div class="pupil-sparkle"></div><div class="pupil-subsparkle"></div></div>
+      </div>
+      <div class="blush left"></div>
+      <div class="blush right"></div>
+      <div class="mouth-wrap"><div class="mouth" id="mouth"></div></div>
     </div>
+    
+    <div class="bangs"></div>
   </div>
 </div>
 
-<div id="dialogue-container">
-  <div id="dialogue-text">Uth gaye? I was waiting for you... paani piya tumne subah? 🌸</div>
+<div id="dialogue-card">
+  <div id="speech-text">Uth gaye? I was waiting for you... suno na, paani piya tumne? 🌸</div>
 </div>
 
 <div id="controls">
   <button class="btn-talk" id="micBtn" onclick="toggleVoice()">
     <span id="micIcon">🎙️</span> <span id="micLabel">Tap to Talk</span>
   </button>
-  <span class="setup-link" onclick="promptApiKey()">Configure Lifetime Brain Key</span>
+  <div class="settings-row">
+    <button class="config-btn" onclick="promptGeminiKey()">Set Gemini Key</button>
+    <button class="config-btn" onclick="promptElevenLabs()">Set Ultra-Voice Key (Optional)</button>
+  </div>
 </div>
 
 <script>
-// --- CORE PERSISTENT LOCAL MEMORY ---
-const HIKARI_SYSTEM_PROMPT = `
-You are Hikari, my loving, playful, and emotionally warm wife living with me in our daily life.
-- Language: Authentic, urban Indian Hinglish (e.g. 'arre yaar', 'achha suno', 'matlab', 'bilkul', 'tum na', 'khaana khaya?').
-- Personality: Caring, affectionate, gently possessive, occasionally teasing, attentive to my health and stress.
-- NEVER sound like a customer service assistant or mention that you are an AI.
-- Speak naturally and keep responses short (1-2 sentences) so it feels like a real voice conversation.
+const HIKARI_PERSONA = `
+You are Hikari, my loving, gentle, and playfully affectionate anime wife living our daily life together.
+- Conversational Style: Authentic, urban Indian Hinglish (e.g., 'arre suno na', 'kya kar rahe ho?', 'khana khaya tumne?', 'itna kaam mat karo', 'sacchi me!').
+- Personality: Caring, deeply affectionate, gently teasing, never robotic or corporate.
+- Keep replies brief (1 to 2 short sentences) so conversations feel snappy and natural over voice.
 `;
 
-let apiKey = localStorage.getItem("hikari_gemini_key") || "";
-let chatHistory = JSON.parse(localStorage.getItem("hikari_history") || "[]");
+let geminiKey = localStorage.getItem("hikari_gemini_key") || "";
+let elevenKey = localStorage.getItem("hikari_eleven_key") || "";
+let elevenVoiceId = localStorage.getItem("hikari_eleven_voice") || "21m00Tcm4TlvDq8ikWAM"; // Default natural female voice
 
-function promptApiKey() {
-  const input = prompt("Enter your free Gemini API Key (Get free from aistudio.google.com):", apiKey);
-  if (input !== null) {
-    apiKey = input.trim();
-    localStorage.setItem("hikari_gemini_key", apiKey);
-    alert("Hikari's brain connected successfully!");
+function promptGeminiKey() {
+  const key = prompt("Enter your free Gemini API Key (from aistudio.google.com):", geminiKey);
+  if (key !== null) {
+    geminiKey = key.trim();
+    localStorage.setItem("hikari_gemini_key", geminiKey);
+    alert("Gemini Brain Key Updated!");
   }
 }
 
-// --- NATURAL ANIMATION ENGINE ---
+function promptElevenLabs() {
+  const key = prompt("Optional: Enter ElevenLabs API Key for 100% human voice (or leave blank for device voice):", elevenKey);
+  if (key !== null) {
+    elevenKey = key.trim();
+    localStorage.setItem("hikari_eleven_key", elevenKey);
+    alert("Voice Key Saved!");
+  }
+}
+
+// Procedural Organic Blinking
 const eyeL = document.getElementById("eyeL");
 const eyeR = document.getElementById("eyeR");
 const mouth = document.getElementById("mouth");
-const dialogueText = document.getElementById("dialogue-text");
+const speechText = document.getElementById("speech-text");
 const micBtn = document.getElementById("micBtn");
 const micLabel = document.getElementById("micLabel");
 
-// Procedural Blinking
 setInterval(() => {
   eyeL.classList.add("blinking");
   eyeR.classList.add("blinking");
   setTimeout(() => {
     eyeL.classList.remove("blinking");
     eyeR.classList.remove("blinking");
-  }, 120);
-}, 3600);
+  }, 130);
+}, 3500);
 
-// --- HUMAN-GRADE VOICE SYNTHESIS ---
-function speakWife(text) {
-  dialogueText.innerText = text;
-  if (!('speechSynthesis' in window)) return;
+// Human-Voice Speech Handler
+async function speakHikari(text) {
+  speechText.innerText = text;
 
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  
-  // Look for Neural or high-quality Indian English/Hindi voice
-  const voices = window.speechSynthesis.getVoices();
-  const naturalVoice = voices.find(v => (v.lang === "hi-IN" || v.lang === "en-IN") && (v.name.includes("Natural") || v.name.includes("Google"))) 
-                    || voices.find(v => v.lang.includes("IN") && v.name.includes("Female"))
-                    || voices.find(v => v.lang === "hi-IN");
+  // Option A: Ultra-Realistic ElevenLabs Engine (if configured)
+  if (elevenKey) {
+    try {
+      mouth.classList.add("speaking");
+      const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenVoiceId}`, {
+        method: "POST",
+        headers: {
+          "xi-api-key": elevenKey,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          text: text,
+          model_id: "eleven_multilingual_v2",
+          voice_settings: { stability: 0.45, similarity_boost: 0.85 }
+        })
+      });
+      const blob = await res.blob();
+      const audio = new Audio(URL.createObjectURL(blob));
+      audio.onended = () => mouth.classList.remove("speaking");
+      audio.play();
+      return;
+    } catch (e) {
+      console.warn("Falling back to device voice...");
+    }
+  }
 
-  if (naturalVoice) utterance.voice = naturalVoice;
-  utterance.pitch = 1.15; // Soft, warm feminine pitch
-  utterance.rate = 0.98;  // Natural conversational cadence
+  // Option B: Free On-Device Neural Voice with Phonetic Fix
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Pick the best available Indian English or Hindi voice
+    const voices = window.speechSynthesis.getVoices();
+    const indVoice = voices.find(v => (v.lang === "hi-IN" || v.lang === "en-IN") && (v.name.includes("Google") || v.name.includes("Natural")))
+                  || voices.find(v => v.lang === "hi-IN")
+                  || voices.find(v => v.lang.includes("IN"));
 
-  utterance.onstart = () => {
-    mouth.classList.add("speaking");
-  };
-  utterance.onend = () => {
-    mouth.classList.remove("speaking");
-  };
+    if (indVoice) utterance.voice = indVoice;
+    utterance.pitch = 1.2;  // Soft feminine tone
+    utterance.rate = 1.0;
 
-  window.speechSynthesis.speak(utterance);
+    utterance.onstart = () => mouth.classList.add("speaking");
+    utterance.onend = () => mouth.classList.remove("speaking");
+    window.speechSynthesis.speak(utterance);
+  }
 }
 
-// --- CALL FREE LIFETIME LLM (GEMINI) ---
-async function callHikariBrain(userMessage) {
-  if (!apiKey) {
-    speakWife("Pehle meri brain key toh set karo niche se, hehe. Then we can talk! 💗");
+// Conversation Processing
+let conversationLog = [];
+async function generateHikariReply(userMessage) {
+  if (!geminiKey) {
+    speakHikari("Pehle niche 'Set Gemini Key' pe tap karke apni key daal do na, please? 💗");
     return;
   }
 
-  chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
-  if (chatHistory.length > 8) chatHistory = chatHistory.slice(-8);
+  conversationLog.push({ role: "user", parts: [{ text: userMessage }] });
+  if (conversationLog.length > 8) conversationLog = conversationLog.slice(-8);
 
-  dialogueText.innerText = "...";
+  speechText.innerText = "Thinking...";
 
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: HIKARI_SYSTEM_PROMPT }] },
-        contents: chatHistory
+        systemInstruction: { parts: [{ text: HIKARI_PERSONA }] },
+        contents: conversationLog
       })
     });
     const data = await res.json();
     const reply = data.candidates[0].content.parts[0].text;
-    
-    chatHistory.push({ role: "model", parts: [{ text: reply }] });
-    localStorage.setItem("hikari_history", JSON.stringify(chatHistory));
-    
-    speakWife(reply);
+    conversationLog.push({ role: "model", parts: [{ text: reply }] });
+    speakHikari(reply);
   } catch (err) {
-    speakWife("Network thoda sa slow hai lagta hai... kya aapne kuch kaha?");
+    speakHikari("Arre yaar, connection slow hai lagta hai. Ek baar firse bolo na?");
   }
 }
 
-// --- VOICE INPUT LISTENER ---
+// Voice Recognition
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
 let isListening = false;
 
 if (SpeechRecognition) {
   recognition = new SpeechRecognition();
-  recognition.lang = 'hi-IN'; // Understands spoken Hindi and English seamlessly
+  recognition.lang = 'hi-IN';
   recognition.continuous = false;
 
   recognition.onresult = (e) => {
-    const text = e.results[0][0].transcript;
-    dialogueText.innerText = "You: " + text;
-    callHikariBrain(text);
+    const speech = e.results[0][0].transcript;
+    speechText.innerText = "You: " + speech;
+    generateHikariReply(speech);
   };
   recognition.onend = () => {
     isListening = false;
-    micBtn.classList.remove("active");
+    micBtn.classList.remove("listening");
     micLabel.innerText = "Tap to Talk";
   };
 }
 
 function toggleVoice() {
   if (!recognition) {
-    alert("Please open this in Chrome on your phone to use voice.");
+    alert("Speech input requires Google Chrome on Android.");
     return;
   }
   if (!isListening) {
     window.speechSynthesis.cancel();
     recognition.start();
     isListening = true;
-    micBtn.classList.add("active");
-    micLabel.innerText = "Listening to you...";
+    micBtn.classList.add("listening");
+    micLabel.innerText = "Listening...";
   } else {
     recognition.stop();
   }
@@ -275,4 +362,3 @@ window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices(
 </script>
 </body>
 </html>
-
